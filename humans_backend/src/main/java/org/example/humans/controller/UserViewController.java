@@ -2,16 +2,17 @@ package org.example.humans.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class UserViewController {
-    @GetMapping("/login")
+    @GetMapping("/account/login")
     public String login(){
         return "login";
     }
 
-    @GetMapping("/signup")
+    @GetMapping("/account/signup")
     public String signup(){
-        return "signup";
+        return "sign-up";
     }
 }

@@ -1,24 +1,25 @@
 package org.example.humans.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.humans.service.UserDetailService;
+import org.example.humans.provider.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.HttpSecurityDslKt;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @RequiredArgsConstructor
 @Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
-    private final UserDetailService userDatailService;
+    private final JwtTokenProvider jwtTokenProvider;
+
     //스프링 시큐리티 기능 비활성화
     @Bean
     public WebSecurityCustomizer configure(){
@@ -26,42 +27,34 @@ public class WebSecurityConfig {
                 .requestMatchers(toH2Console())
                 .requestMatchers("/static/**"));
     }
-    //특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/signup", "/user").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/user")
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)
-                )
-                .csrf(csrf -> csrf.disable()); // CSRF 비활성화 -> 웹 애플리케이션 보안기능, 악의적인 요청이 사용자의 세션을 이요해 수행되지 않도록 보호, rest api 쓸 떄는 비활성화하는 경우도 ㅏㅁㄴㅎ음
+                // REST API이므로 기본 인증을 사용하지 않음
+                .httpBasic(httpBasic -> httpBasic.disable())
+                // CSRF 보호를 비활성화
+                .csrf(csrf -> csrf.disable())
+                // JWT를 사용하기 때문에 세션을 사용하지 않음
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // 해당 API에 대해서는 모든 요청을 허가
+                        .requestMatchers("/account/login").permitAll()
+                        .requestMatchers("/account/signup").permitAll()
+                        // USER 권한이 있어야 요청할 수 있음
+                        .requestMatchers("/account/test").hasRole("USER")
+                        //.requestMatchers("/account/users").hasRole("USER")
+                        // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
+                        .anyRequest().authenticated())
+                // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    //인증 관리자 관련 설정
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailService userDatailService)
-        throws Exception{
-        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-
-        authManagerBuilder
-                .userDetailsService(userDatailService)
-                .passwordEncoder(bCryptPasswordEncoder);
-
-        return authManagerBuilder.build();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }
