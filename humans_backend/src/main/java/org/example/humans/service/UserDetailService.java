@@ -9,15 +9,26 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
-//사용자 정보 가져오는 인터페이스
+@RequiredArgsConstructor
 public class UserDetailService implements UserDetailsService {
-    private  final UserRepository userRepository;
-    //id로 사용자 정보 가져오는 메소드
+
+    private final UserRepository userRepository;
+
     @Override
-    public Users loadUserByUsername(String ID) {
+    public UserDetails loadUserByUsername(String ID) throws UsernameNotFoundException {
         return userRepository.findByID(ID)
-                .orElseThrow(()->new IllegalArgumentException((ID)));
+                .map(this::createUserDetails)
+                .orElseThrow(() -> new UsernameNotFoundException("해당하는 회원을 찾을 수 없습니다."));
     }
+
+    // 해당하는 User 의 데이터가 존재한다면 UserDetails 객체로 만들어서 return
+    private UserDetails createUserDetails(Users users) {
+        return User.builder()
+                .username(users.getUsername())
+                .password(users.getPassword())
+                .roles(users.getRoles().toArray(new String[0]))
+                .build();
+    }
+
 }
