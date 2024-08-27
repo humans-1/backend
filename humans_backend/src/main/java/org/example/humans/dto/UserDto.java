@@ -9,22 +9,22 @@ import org.example.humans.domain.Users;
 @NoArgsConstructor
 @Builder
 public class UserDto {
-    private Long UserID;
+    private Long userId;
     private String id;
     private String password;
     private String nickName;
 
     static public UserDto toDtoWithoutPassword(Users users) {
         return UserDto.builder()
-                .UserID(users.getUserID())
-                .id(users.getID())
+                .userId(users.getUserId())
+                .id(users.getId())
                 .nickName(users.getNickName())
                 .build();
     }
     static public UserDto toDto(Users users){
         return UserDto.builder()
-                .UserID(users.getUserID())
-                .id(users.getID())
+                .userId(users.getUserId())
+                .id(users.getId())
                 .password(users.getPassword())
                 .nickName(users.getNickName())
                 .build();
@@ -32,8 +32,8 @@ public class UserDto {
 
     public Users toEntity(){
         return Users.builder()
-                .UserID(UserID)
-                .ID(id)
+                .userId(userId)
+                .id(id)
                 .password(password)
                 .nickName(nickName)
                 .build();
