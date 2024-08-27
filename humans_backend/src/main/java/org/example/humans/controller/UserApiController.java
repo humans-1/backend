@@ -32,12 +32,12 @@ public class UserApiController {
 
     @PostMapping("/account/login")
     public ResponseEntity<?> login(@RequestBody LogInDto loginDto){
-        String ID = loginDto.getId();
+        String id = loginDto.getId();
         String password = loginDto.getPassword();
 
         try {
             JwtToken jwtToken = userService.login(loginDto);
-            log.info("request ID = {}, password = {}", ID, password);
+            log.info("request ID = {}, password = {}", id, password);
             log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
             return ResponseEntity.ok(jwtToken);
         } catch (IllegalArgumentException e) {
