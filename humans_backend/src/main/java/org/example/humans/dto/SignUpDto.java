@@ -18,7 +18,7 @@ public class SignUpDto {
 
     public Users toEntity(String encodedPassword, List<String> roles){
         return Users.builder()
-                .ID(id)
+                .id(id)
                 .password(encodedPassword)
                 .nickName(nickName)
                 .roles(roles)

@@ -2,7 +2,6 @@ package org.example.humans.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.humans.dto.LogInDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,22 +11,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Entity
 @Table(name="users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode(of = "userId")
 @Builder
-@EqualsAndHashCode(of = "UserID")
-@Entity
 public class Users implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //기본키 자동으로 1씩 증가
-    @Column(name = "UserID", updatable = false, unique = true, nullable = false)
-    private Long UserID;
 
-    @Column(name = "ID", nullable = false, unique = true)
-    private String ID;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userId", updatable = false, unique = true, nullable = false)
+    private Long userId;
+
+    @Column(name = "id", nullable = false, unique = true)
+    private String id;
 
     @Setter
     @Column(name = "password", nullable = false)
@@ -36,16 +36,16 @@ public class Users implements UserDetails {
     @Column(name = "nickName", nullable = false)
     private String nickName;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> roles = new ArrayList<>();
+
     @Builder
-    public Users(String ID, String password, String nickName){
-        this.ID = ID;
+    public Users(String id, String password, String nickName, List<String> roles){
+        this.id = id;
         this.password = password;
         this.nickName = nickName;
+        this.roles = roles != null ? roles : new ArrayList<>();
     }
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -56,7 +56,7 @@ public class Users implements UserDetails {
 
     @Override
     public String getUsername(){
-        return this.ID;
+        return this.id;
     }
 
     @Override
@@ -78,5 +78,4 @@ public class Users implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }

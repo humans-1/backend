@@ -1,6 +1,7 @@
 package org.example.humans.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.humans.HumansApplication;
 import org.example.humans.dto.JwtToken;
 import org.example.humans.dto.LogInDto;
 import org.example.humans.dto.SignUpDto;
@@ -14,10 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = HumansApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @Slf4j
 class UserApiControllerTest {
     @Autowired
@@ -34,9 +37,9 @@ class UserApiControllerTest {
     @BeforeEach
     void beforeEach() {
         signUpDto = SignUpDto.builder()
-                .id("spring@naver.com")
-                .password("12345678")
-                .nickName("sp")
+                .id("spring1@naver.com")
+                .password("123456789")
+                .nickName("spr")
                 .build();
     }
 
@@ -63,8 +66,8 @@ class UserApiControllerTest {
         userService.signUp(signUpDto);
 
         LogInDto logInDto = LogInDto.builder()
-                .id("spring@naver.com")
-                .password("12345678").build();
+                .id("spring1@naver.com")
+                .password("123456789").build();
 
         JwtToken jwtToken = userService.login(logInDto);
 

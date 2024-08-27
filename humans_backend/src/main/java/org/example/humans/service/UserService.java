@@ -33,7 +33,17 @@ public class UserService {
 
     @Transactional
     public JwtToken login(LogInDto logInDto) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(logInDto.getId(), logInDto.getPassword());
+        // 사용자가 데이터베이스에 존재하는지 확인
+        Users user = userRepository.findById(logInDto.getId())
+                .orElseThrow(() -> new NotFoundUserException("잘못된 ID 또는 비밀번호입니다."));
+
+        if (!passwordMatches(logInDto.getPassword(), user.getPassword())) {
+            log.warn("로그인 실패: 잘못된 비밀번호");
+            throw new IllegalArgumentException("잘못된 ID 또는 비밀번호입니다.");
+        }
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(logInDto.getId(), logInDto.getPassword());
 
         try {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
@@ -46,7 +56,7 @@ public class UserService {
 
     @Transactional
     public UserDto signUp(SignUpDto signUpDto) {
-        if (userRepository.existsByID(signUpDto.getId())) {
+        if (userRepository.existsById(signUpDto.getId())) {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
 
@@ -67,3 +77,4 @@ public class UserService {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }
+

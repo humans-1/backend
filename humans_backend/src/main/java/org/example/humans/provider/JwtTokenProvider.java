@@ -30,13 +30,13 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public JwtToken generateToken(Authentication authentication){
+    public JwtToken generateToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date accessTokenExpiresIn = new Date(now + 86400000); // 1일
+        Date accessTokenExpiresIn = new Date(now + 86400000 * 10); // 임시로 만료 시간 10일 연장
 
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
@@ -73,24 +73,68 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(principal,"",authorities);
     }
 
-    public boolean validateToken(String token){
+    public JwtToken refreshAccessToken(String refreshToken){
+        if (!validateToken(refreshToken)) {
+            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        Claims claims = parseClaims(refreshToken);
+        String username = claims.getSubject();
+        String authorities = claims.get("auth", String.class);
+
+        Collection<? extends GrantedAuthority> authorityList = Arrays.stream(authorities.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        UserDetails principal = new User(username, "", authorityList);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principal, "", authorityList);
+
+        // 새로운 액세스 토큰 생성
+        return generateAccessToken(authentication);
+    }
+
+    public JwtToken generateAccessToken(Authentication authentication){
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + 86400000); // 1일
+
+        String accessToken = Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .build();
+    }
+
+
+
+    // JwtTokenProvider.java
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token); // 수정된 부분
+                    .parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e){
-            log.info("Invalid JWT Token", e);
-        } catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e){
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e){
-            log.info("JWT claims string is empty", e);
+            // 만료된 토큰에 대해 강제로 로그인 허용
+            return false;
+        } catch (Exception e) {
+            log.info("Invalid JWT Token", e);
         }
         return false;
     }
+
+
 
     private Claims parseClaims(String accessToken){
         try {

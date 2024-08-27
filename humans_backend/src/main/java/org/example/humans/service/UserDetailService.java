@@ -17,7 +17,7 @@ public class UserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String ID) throws UsernameNotFoundException {
-        return userRepository.findByID(ID)
+        return userRepository.findById(ID)
                 .map(this::createUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 회원을 찾을 수 없습니다."));
     }
