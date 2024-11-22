@@ -31,10 +31,8 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
-            "/members/login",
-            "/members/signup",
-            "/oauth2/callback/kakao",
-            "/oauth2/authorization/kakao"
+            "/users/login",
+            "/users/signup"
     };
 
     @Bean

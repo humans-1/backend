@@ -20,10 +20,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(401);
 
         CustomResponse<Object> errorResponse = CustomResponse.onFailure(
-                GeneralErrorCode.UNAUTHORIZED_401.getStatus(),
+
                 GeneralErrorCode.UNAUTHORIZED_401.getCode(),
                 GeneralErrorCode.UNAUTHORIZED_401.getMessage(),
-                false,
                 null
         );
 
