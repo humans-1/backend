@@ -51,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setStatus(code.getStatus().value());
             response.setContentType("application/json; charset=UTF-8");
 
-            CustomResponse<Object> customResponse = CustomResponse.onFailure(code.getStatus(), code.getCode(), code.getMessage(), false, "");
+            CustomResponse<Object> customResponse = CustomResponse.onFailure(code.getCode(), code.getMessage(), null);
 
             ObjectMapper om = new ObjectMapper();
             om.writeValue(response.getOutputStream(), customResponse);

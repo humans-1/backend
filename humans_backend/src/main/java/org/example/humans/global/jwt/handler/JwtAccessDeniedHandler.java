@@ -21,10 +21,8 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(403);
 
         CustomResponse<Object> errorResponse = CustomResponse.onFailure(
-                GeneralErrorCode.FORBIDDEN_403.getStatus(),
                 GeneralErrorCode.FORBIDDEN_403.getCode(),
                 GeneralErrorCode.FORBIDDEN_403.getMessage(),
-                false,
                 null
         );
 
