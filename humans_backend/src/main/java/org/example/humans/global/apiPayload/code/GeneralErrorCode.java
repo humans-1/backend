@@ -23,6 +23,7 @@ public enum GeneralErrorCode implements BaseErrorCode{
             HttpStatus.INTERNAL_SERVER_ERROR,
             "COMMON500",
             "서버 내부 오류가 발생했습니다"),
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST,"VALID400_0","잘못된 파라미터 접근입니다")
     ;
 
     private final HttpStatus status;
