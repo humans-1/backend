@@ -19,7 +19,7 @@ public class User extends BaseEntity {
     private Long id;
 
     @Column(name = "name")
-    private String name;
+    private String nickname;
 
     @Column(name = "email")
     private String email;
@@ -38,8 +38,17 @@ public class User extends BaseEntity {
 
     // 소프트 삭제 메서드
     public void softDelete() {
-
         this.deletedAt = LocalDateTime.now();
         this.active = false;
+    }
+    public void restore(){
+        this.deletedAt = null;
+        this.active = true;
+    }
+    public void updateNickname(String nickname){
+        this.nickname = nickname;
+    }
+    public void setPassword(String newEncodedPassword){
+        password = newEncodedPassword;
     }
 }
