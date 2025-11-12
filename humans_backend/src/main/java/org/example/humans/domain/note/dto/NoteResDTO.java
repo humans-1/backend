@@ -11,6 +11,7 @@ public class NoteResDTO {
     public record NoteDetailsDTO(
             String name,
             Long id,
+            Long userId,
             LocalDateTime deletedAt,
             List<OnlyNote> onlyNote
     ){}
