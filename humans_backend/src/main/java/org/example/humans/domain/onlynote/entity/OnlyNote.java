@@ -19,6 +19,15 @@ public class OnlyNote extends BaseEntity {
     @Column(name = "onlynote_id")
     private Long id;
 
+    @Column(name = "typing")
+    private String typing;
+
+    @Column(name = "hightfile")
+    private String hightfile;
+
+    @Column(name = "mynote")
+    private String mynote;
+
     @Column(name = "week")
     private String week;
 
