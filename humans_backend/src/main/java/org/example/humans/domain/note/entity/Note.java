@@ -3,6 +3,7 @@ package org.example.humans.domain.note.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.humans.domain.onlynote.entity.OnlyNote;
+import org.example.humans.domain.user.entity.User;
 import org.example.humans.global.entity.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,10 @@ public class Note extends BaseEntity {
 
     @OneToMany(mappedBy = "note")
     private List<OnlyNote> onlyNote;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // 소프트 삭제 메서드
     public void softDelete() {
